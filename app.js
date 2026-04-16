@@ -277,7 +277,7 @@ function renderLedger(list) {
       <td>${c.auth_date || ''}</td>
       <td>${c.notes || ''}</td>
       <td style="white-space:nowrap">
-        <button class="btn btn-sm" onclick="editCompany(${c.id})">編輯</button>
+        <button class="btn btn-sm" onclick="editCompany(${c.id})">编辑</button>
         <button class="btn btn-sm btn-danger" onclick="deleteCompany(${c.id}, \`${c.name.replace(/`/g,'\\`')}\`)">刪除</button>
       </td>
     </tr>
@@ -285,14 +285,18 @@ function renderLedger(list) {
 }
 
 function filterLedger() {
-  const q = $('ledger-search').value.trim().toLowerCase()
-  renderLedger(q ? allCompanies.filter(c => c.name.toLowerCase().includes(q)) : allCompanies)
+  const q     = $('ledger-search').value.trim().toLowerCase()
+  const sheet = $('ledger-filter-sheet').value
+  renderLedger(allCompanies.filter(c =>
+    (!q     || c.name.toLowerCase().includes(q)) &&
+    (!sheet || c.sheet_name === sheet)
+  ))
 }
 
 function showCompanyForm() {
   editingCompanyId = null
   $('modal-title').textContent = '新增公司'
-  $('cf-name').value = $('cf-date').value = $('cf-group').value = $('cf-sheet').value = $('cf-notes').value = ''
+  $('cf-name').value = $('cf-date').value = $('cf-sheet').value = $('cf-notes').value = ''
   $('company-modal').classList.remove('hidden')
   $('cf-name').focus()
 }
@@ -304,7 +308,6 @@ function editCompany(id) {
   $('modal-title').textContent = '編輯公司'
   $('cf-name').value = c.name
   $('cf-date').value = c.auth_date
-  $('cf-group').value = c.group_name || ''
   $('cf-sheet').value = c.sheet_name || ''
   $('cf-notes').value = c.notes || ''
   $('company-modal').classList.remove('hidden')
@@ -317,7 +320,7 @@ async function saveCompany() {
   const body = {
     name: $('cf-name').value.trim(),
     auth_date: $('cf-date').value.trim(),
-    group_name: $('cf-group').value.trim(),
+    group_name: '征信查询授权书',
     sheet_name: $('cf-sheet').value.trim(),
     notes: $('cf-notes').value.trim(),
   }

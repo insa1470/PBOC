@@ -38,80 +38,126 @@ body {
 .hidden { display: none !important; }
 
 /* ── Landing ─────────────────────────────────── */
+#screen-landing {
+  background: linear-gradient(160deg, #0a1628 0%, #0d2a52 50%, #0a3d6b 100%);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-admin-btn {
+  position: absolute;
+  top: 20px; right: 20px;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.landing-admin-btn:hover {
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+
 .landing-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 48px 24px;
-  background: var(--bg);
+  padding: 60px 24px 48px;
 }
 
 .landing-header {
   text-align: center;
-  margin-bottom: 52px;
+  margin-bottom: 56px;
+}
+.landing-logo {
+  margin-bottom: 18px;
 }
 .landing-header h1 {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 700;
   letter-spacing: -0.5px;
-  color: var(--gray1);
-  margin-bottom: 6px;
+  color: white;
+  margin-bottom: 8px;
 }
 .landing-header p {
   font-size: 15px;
-  color: var(--gray3);
+  color: rgba(255,255,255,0.5);
   font-weight: 400;
 }
 
 .role-cards {
   display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 340px;
 }
 
 .role-card {
-  background: var(--card);
-  border-radius: var(--radius-xl);
-  padding: 32px 28px;
-  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  padding: 22px 22px;
   cursor: pointer;
-  box-shadow: var(--shadow);
-  min-width: 160px;
-  border: 1px solid var(--border);
-  transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s ease;
-}
-.role-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
 }
 .role-card:active { transform: scale(0.97); }
 
-.role-icon {
-  width: 60px; height: 60px;
-  border-radius: 16px;
-  background: rgba(0,122,255,0.1);
-  color: var(--blue);
+.requester-card {
+  background: linear-gradient(135deg, #007AFF, #0055cc);
+  box-shadow: 0 8px 32px rgba(0,122,255,0.4);
+}
+.operator-card {
+  background: linear-gradient(135deg, #1c1c2e, #2c2c44);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.card-bg-shape {
+  position: absolute;
+  right: -20px; top: -20px;
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+}
+
+.card-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.15);
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700;
-  margin: 0 auto 16px;
-  letter-spacing: 0.3px;
+  color: white;
+  flex-shrink: 0;
 }
-.admin-card .role-icon {
-  background: rgba(255,149,0,0.1);
-  color: var(--orange);
-}
-.role-card h3 {
-  font-size: 15px;
+
+.card-text { flex: 1; }
+.card-text h3 {
+  font-size: 17px;
   font-weight: 600;
-  margin-bottom: 4px;
-  color: var(--gray1);
+  color: white;
+  margin-bottom: 3px;
 }
-.role-card p {
-  color: var(--gray3);
+.card-text p {
   font-size: 13px;
+  color: rgba(255,255,255,0.6);
+}
+
+.card-arrow {
+  font-size: 22px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 300;
+  margin-right: 4px;
 }
 
 /* ── Navigation bar ──────────────────────────── */
