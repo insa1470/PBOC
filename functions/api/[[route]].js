@@ -165,9 +165,14 @@ async function createOperator(req, env) {
   if (!await isAdmin(req, env)) return j({ error: '未授權' }, 401)
   const { name } = await req.json()
   if (!name?.trim()) return j({ error: '請輸入姓名' }, 400)
-  const r = await env.DB.prepare(`INSERT INTO operators (name) VALUES (?)`).bind(name.trim()).run()
-  await addLog(env, '管理員', 'admin', '新增查詢員', name.trim())
-  return j({ id: r.meta.last_row_id, name: name.trim() }, 201)
+  try {
+    const r = await env.DB.prepare(`INSERT INTO operators (name) VALUES (?)`).bind(name.trim()).run()
+    await addLog(env, '管理員', 'admin', '新增查詢員', name.trim())
+    return j({ id: r.meta.last_row_id, name: name.trim() }, 201)
+  } catch (e) {
+    if (e.message?.includes('UNIQUE')) return j({ error: `「${name.trim()}」已存在，請勿重複新增` }, 409)
+    throw e
+  }
 }
 
 async function deleteOperator(id, req, env) {
