@@ -1,0 +1,4 @@
+*.xlsx
+*.xls
+seed.sql
+.claude/
