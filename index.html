@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>徵信查詢系統</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ── 首頁：選擇角色 ── -->
+  <div class="screen" id="screen-landing">
+    <div class="landing-wrap">
+      <div class="landing-header">
+        <h1>徵信查詢系統</h1>
+        <p>深圳分行</p>
+      </div>
+      <div class="role-cards">
+        <div class="role-card" onclick="goTo('requester')">
+          <div class="role-icon">申請</div>
+          <h3>提出申請</h3>
+          <p>填寫查詢需求單</p>
+        </div>
+        <div class="role-card" onclick="goTo('operator')">
+          <div class="role-icon">查詢</div>
+          <h3>查詢作業</h3>
+          <p>處理待辦查詢</p>
+        </div>
+        <div class="role-card admin-card" onclick="goTo('admin-login')">
+          <div class="role-icon">管理</div>
+          <h3>管理員</h3>
+          <p>系統設定與紀錄</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 申請人 ── -->
+  <div class="screen hidden" id="screen-requester">
+    <div class="page-header">
+      <button class="btn-back" onclick="goTo('landing')">← 返回</button>
+      <h2>提出查詢申請</h2>
+    </div>
+    <div class="form-wrap">
+
+      <div class="form-section">
+        <div class="form-group">
+          <label>申請人姓名</label>
+          <input id="req-name" type="text" placeholder="請輸入您的姓名">
+        </div>
+        <div class="form-group">
+          <label>指定查詢員</label>
+          <select id="req-operator">
+            <option value="">-- 選擇查詢員 --</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>新增查詢公司</h3>
+        <div class="search-row">
+          <div class="search-input-wrap">
+            <input id="company-search" type="text" placeholder="輸入公司名稱搜尋..." oninput="onCompanyInput(event)" autocomplete="off">
+            <div id="company-dropdown" class="dropdown hidden"></div>
+          </div>
+          <select id="item-purpose">
+            <option value="">-- 查詢目的 --</option>
+            <option value="貸前">貸前</option>
+            <option value="貸中">貸中</option>
+            <option value="貸後">貸後</option>
+            <option value="擔保">擔保</option>
+          </select>
+          <button class="btn btn-primary" onclick="addItem()">新增</button>
+        </div>
+        <div id="auth-date-notice" class="auth-date-notice hidden">
+          台帳授權起始日：<strong id="selected-auth-date"></strong>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>本次申請清單</h3>
+        <div id="batch-list">
+          <p class="empty-hint">尚未新增任何公司</p>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary btn-large" onclick="submitBatch()">送出申請</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── 查詢員 ── -->
+  <div class="screen hidden" id="screen-operator">
+    <div class="page-header">
+      <button class="btn-back" onclick="goTo('landing')">← 返回</button>
+      <h2>查詢作業</h2>
+    </div>
+
+    <div id="op-name-section" class="form-wrap">
+      <div class="form-section">
+        <div class="form-group">
+          <label>請輸入您的姓名</label>
+          <input id="op-name" type="text" placeholder="查詢員姓名"
+            onkeydown="if(event.key==='Enter') loadPendingItems()">
+        </div>
+        <button class="btn btn-primary" onclick="loadPendingItems()">查看待辦</button>
+      </div>
+    </div>
+
+    <div id="op-items-section" class="hidden">
+      <div class="op-subheader">
+        <span><strong id="op-current-name"></strong> 的待辦查詢
+          <span id="pending-count" class="count-badge">0</span>
+        </span>
+        <button class="btn btn-ghost btn-sm" onclick="switchOperator()">切換人員</button>
+      </div>
+      <div id="pending-list"></div>
+    </div>
+  </div>
+
+  <!-- ── 管理員登入 ── -->
+  <div class="screen hidden" id="screen-admin-login">
+    <div class="page-header">
+      <button class="btn-back" onclick="goTo('landing')">← 返回</button>
+      <h2>管理員登入</h2>
+    </div>
+    <div class="login-wrap">
+      <div class="form-group">
+        <label>帳號</label>
+        <input id="admin-username" type="text" placeholder="帳號">
+      </div>
+      <div class="form-group">
+        <label>密碼</label>
+        <input id="admin-password" type="password" placeholder="密碼"
+          onkeydown="if(event.key==='Enter') doAdminLogin()">
+      </div>
+      <p id="login-error" class="error-msg"></p>
+      <button class="btn btn-primary btn-large" onclick="doAdminLogin()">登入</button>
+    </div>
+  </div>
+
+  <!-- ── 管理員後台 ── -->
+  <div class="screen hidden" id="screen-admin">
+    <div class="admin-header">
+      <h2>管理員後台</h2>
+      <button class="btn btn-ghost btn-sm" onclick="doAdminLogout()">登出</button>
+    </div>
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="ledger" onclick="loadAdminTab('ledger')">台帳管理</button>
+      <button class="tab-btn" data-tab="records" onclick="loadAdminTab('records')">查詢紀錄</button>
+      <button class="tab-btn" data-tab="logs" onclick="loadAdminTab('logs')">操作日誌</button>
+      <button class="tab-btn" data-tab="operators" onclick="loadAdminTab('operators')">查詢員管理</button>
+      <button class="tab-btn" data-tab="account" onclick="loadAdminTab('account')">帳號設定</button>
+    </div>
+
+    <!-- 台帳 -->
+    <div class="tab-content" data-tab="ledger">
+      <div class="tab-toolbar">
+        <input id="ledger-search" type="text" placeholder="搜尋公司名稱..." oninput="filterLedger()" style="max-width:280px">
+        <button class="btn btn-primary" onclick="showCompanyForm()">+ 新增公司</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>部門</th><th>組別</th><th>公司名稱</th>
+              <th>授權起始日</th><th>備注</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="ledger-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 查詢紀錄 -->
+    <div class="tab-content hidden" data-tab="records">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>申請時間</th><th>申請人</th><th>查詢員</th>
+              <th>公司名稱</th><th>查詢目的</th><th>狀態</th>
+            </tr>
+          </thead>
+          <tbody id="records-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 操作日誌 -->
+    <div class="tab-content hidden" data-tab="logs">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>時間</th><th>操作人</th><th>動作</th><th>詳情</th></tr>
+          </thead>
+          <tbody id="logs-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 查詢員管理 -->
+    <div class="tab-content hidden" data-tab="operators">
+      <div class="add-row">
+        <input id="new-op-name" type="text" placeholder="查詢員姓名"
+          onkeydown="if(event.key==='Enter') addOperator()">
+        <button class="btn btn-primary" onclick="addOperator()">新增查詢員</button>
+      </div>
+      <div id="operators-list"></div>
+    </div>
+
+    <!-- 帳號設定 -->
+    <div class="tab-content hidden" data-tab="account">
+      <div class="form-wrap" style="padding-top:0">
+        <div class="form-section">
+          <div class="form-group">
+            <label>新帳號</label>
+            <input id="new-username" type="text" placeholder="保持不變則留空">
+          </div>
+          <div class="form-group">
+            <label>新密碼</label>
+            <input id="new-pw" type="password" placeholder="新密碼">
+          </div>
+          <div class="form-group">
+            <label>確認密碼</label>
+            <input id="new-pw2" type="password" placeholder="再輸入一次">
+          </div>
+          <button class="btn btn-primary" onclick="doChangePassword()">儲存變更</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 送出成功 ── -->
+  <div class="screen hidden" id="screen-success">
+    <div class="success-wrap">
+      <div class="success-icon">&#10003;</div>
+      <h2>申請已送出</h2>
+      <p>查詢員將盡快處理您的申請</p>
+      <button class="btn btn-primary" style="margin-top:24px" onclick="goTo('landing')">返回首頁</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── 新增/編輯公司 Modal ── -->
+<div id="company-modal" class="modal hidden" onclick="if(event.target===this)closeCompanyForm()">
+  <div class="modal-content">
+    <h3 id="modal-title">新增公司</h3>
+    <div class="form-group">
+      <label>公司名稱 *</label>
+      <input id="cf-name" type="text" placeholder="公司名稱">
+    </div>
+    <div class="form-group">
+      <label>授權起始日 *</label>
+      <input id="cf-date" type="text" placeholder="例如 2025.7.15">
+    </div>
+    <div class="form-group">
+      <label>組別</label>
+      <input id="cf-group" type="text" placeholder="例如 301组">
+    </div>
+    <div class="form-group">
+      <label>部門</label>
+      <input id="cf-sheet" type="text" placeholder="例如 外商组">
+    </div>
+    <div class="form-group">
+      <label>備注</label>
+      <input id="cf-notes" type="text" placeholder="備注（選填）">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeCompanyForm()">取消</button>
+      <button class="btn btn-primary" onclick="saveCompany()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

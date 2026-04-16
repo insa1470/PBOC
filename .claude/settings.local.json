@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ':*)",
+      "Bash(xxd /Users/insahung/徵信系統/台帳.xlsx)"
+    ]
+  }
+}

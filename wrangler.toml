@@ -1,0 +1,11 @@
+name = "zhengxin-system"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "zhengxin-db"
+database_id = "a2eb1df4-792f-426c-95ca-5721f8a14ff1"
+
+[vars]
+ADMIN_SECRET = "REPLACE_WITH_RANDOM_SECRET"
