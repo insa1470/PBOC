@@ -226,14 +226,19 @@ async function initOperator() {
   }
 }
 
+let pendingItemsData = []
+let completedItemsData = []
+
 async function loadPendingItems() {
   const name = $('op-name-select').value
   if (!name) { alert('請選擇您的姓名'); return }
   currentOperatorName = name
+  completedItemsData = []
 
   try {
     const items = await api('GET', `/batches/pending?operator=${encodeURIComponent(name)}`)
     renderPendingItems(items)
+    renderCompletedItems()
     $('op-current-name').textContent = name
     $('op-name-section').classList.add('hidden')
     $('op-items-section').classList.remove('hidden')
@@ -243,6 +248,7 @@ async function loadPendingItems() {
 }
 
 function renderPendingItems(items) {
+  pendingItemsData = items
   $('pending-count').textContent = items.length
   const el = $('pending-list')
   if (!items.length) {
@@ -263,22 +269,41 @@ function renderPendingItems(items) {
   `).join('')
 }
 
+function renderCompletedItems() {
+  const count = completedItemsData.length
+  $('completed-count').textContent = count
+  $('completed-section').classList.toggle('hidden', count === 0)
+  if (!count) return
+  $('completed-list').innerHTML = completedItemsData.map(item => `
+    <div class="pending-item" style="opacity:0.6">
+      <div class="pending-item-main">
+        <strong>${item.company_name}</strong>&nbsp;
+        <span class="purpose-tag">${item.purpose}</span>
+        <div class="pending-item-meta">
+          申請人：${item.requester_name}&nbsp;|&nbsp;文件日：${item.company_auth_date || '-'}
+        </div>
+      </div>
+      <span style="font-size:0.82em;color:#4caf50;white-space:nowrap">✓ 已完成</span>
+    </div>
+  `).join('')
+}
+
 async function completeItem(id) {
   try {
     await api('PUT', `/items/${id}/complete`, { operator_name: currentOperatorName })
-    const el = $(`pi-${id}`)
-    if (el) el.remove()
-    const current = parseInt($('pending-count').textContent) - 1
-    $('pending-count').textContent = current
-    if (current <= 0) {
-      $('pending-list').innerHTML = '<div class="empty-state">目前沒有待辦查詢</div>'
-    }
+    const item = pendingItemsData.find(i => i.id === id)
+    if (item) completedItemsData.unshift(item)
+    pendingItemsData = pendingItemsData.filter(i => i.id !== id)
+    renderPendingItems(pendingItemsData)
+    renderCompletedItems()
   } catch (e) {
     alert('操作失敗：' + e.message)
   }
 }
 
 function switchOperator() {
+  completedItemsData = []
+  $('completed-section').classList.add('hidden')
   $('op-name-section').classList.remove('hidden')
   $('op-items-section').classList.add('hidden')
   $('op-name-select').value = ''
