@@ -65,6 +65,20 @@ wrangler d1 execute zhengxin-db --file=seed.sql --remote
 
 ---
 
+## 部署注意事項
+
+每次更新 `app.js` 或 `style.css` 時，**必須同步升高 `index.html` 裡的版本號**，強制所有瀏覽器載入新版：
+
+```html
+<!-- index.html -->
+<link rel="stylesheet" href="style.css?v=X">   <!-- 升 v 號 -->
+<script src="app.js?v=X"></script>              <!-- 升 v 號 -->
+```
+
+不升版本號會導致用戶瀏覽器快取舊版，看不到更新。
+
+---
+
 ## 本地開發
 
 ```bash
