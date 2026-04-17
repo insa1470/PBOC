@@ -42,13 +42,18 @@ function daysUntilExpiry(authDateStr) {
   return Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
 }
 
-function downloadCsv(rows, filename) {
-  const csv  = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
-  const url  = URL.createObjectURL(blob)
-  const a    = document.createElement('a')
-  a.href = url; a.download = filename; a.click()
-  URL.revokeObjectURL(url)
+function downloadXlsx(rows, filename, colWidths) {
+  const ws = XLSX.utils.aoa_to_sheet(rows)
+  if (colWidths) ws['!cols'] = colWidths.map(w => ({ wch: w }))
+  // 標題行加粗
+  const range = XLSX.utils.decode_range(ws['!ref'])
+  for (let c = range.s.c; c <= range.e.c; c++) {
+    const cell = ws[XLSX.utils.encode_cell({ r: 0, c })]
+    if (cell) cell.s = { font: { bold: true } }
+  }
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
+  XLSX.writeFile(wb, filename)
 }
 
 // ── State ────────────────────────────────────────────────────────────────────
@@ -391,7 +396,7 @@ function exportLedger() {
     }
     rows.push([c.sheet_name || '', c.name, c.auth_date || '', expiry, c.notes || ''])
   })
-  downloadCsv(rows, `台帳_${new Date().toISOString().slice(0,10)}.csv`)
+  downloadXlsx(rows, `台帳_${new Date().toISOString().slice(0,10)}.xlsx`, [10, 28, 14, 14, 20])
 }
 
 function filterLedger() {
@@ -547,7 +552,7 @@ function exportRecords() {
     i.status === 'completed' ? '已完成' : '待處理',
     i.completed_by || '', fmt(i.completed_at)
   ]))
-  downloadCsv(rows, `查詢記錄_${new Date().toISOString().slice(0,10)}.csv`)
+  downloadXlsx(rows, `查詢記錄_${new Date().toISOString().slice(0,10)}.xlsx`, [18, 10, 10, 28, 8, 8, 10, 18])
 }
 
 // ── Logs ──────────────────────────────────────────────────────────────────────
@@ -601,7 +606,7 @@ function exportLogs() {
   )
   const rows = [['時間', '操作人', '動作', '詳情']]
   list.forEach(l => rows.push([fmt(l.created_at), l.actor, l.action, l.detail || '']))
-  downloadCsv(rows, `操作日誌_${new Date().toISOString().slice(0,10)}.csv`)
+  downloadXlsx(rows, `操作日誌_${new Date().toISOString().slice(0,10)}.xlsx`, [18, 12, 16, 45])
 }
 
 // ── Operators admin ───────────────────────────────────────────────────────────
