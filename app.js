@@ -124,23 +124,29 @@ function resetAuthNotice() {
 }
 
 function addItem() {
-  if (!selectedCompany) { alert('請先搜尋並選擇公司'); return }
+  const reqName  = $('req-name').value.trim()
+  const operator = $('req-operator').value
+  if (!reqName)        { alert('請先填寫申請人姓名'); $('req-name').focus(); return }
+  if (!operator)       { alert('請先選擇指定查詢員'); $('req-operator').focus(); return }
+  if (!selectedCompany){ alert('請搜尋並選擇查詢公司'); $('company-search').focus(); return }
   const purpose = $('item-purpose').value
-  if (!purpose) { alert('請選擇查詢目的'); return }
+  if (!purpose)        { alert('請選擇查詢目的'); $('item-purpose').focus(); return }
 
   batchItems.push({
-    company_id: selectedCompany.id,
+    company_id:   selectedCompany.id,
     company_name: selectedCompany.name,
-    auth_date: selectedCompany.auth_date || '',
+    auth_date:    selectedCompany.auth_date || '',
     purpose,
   })
   renderBatchList()
 
-  // reset
+  // 只清除公司和目的，保留姓名和查詢員，方便連續添加
   selectedCompany = null
   $('company-search').value = ''
   $('item-purpose').value = ''
   $('auth-date-notice').classList.add('hidden')
+  hideDropdown()
+  $('company-search').focus()
 }
 
 function removeItem(idx) {
@@ -190,9 +196,28 @@ document.addEventListener('click', e => {
 
 // ── Operator ─────────────────────────────────────────────────────────────────
 
+async function initOperator() {
+  goTo('operator')
+  $('op-name-section').classList.remove('hidden')
+  $('op-items-section').classList.add('hidden')
+  const sel = $('op-name-select')
+  sel.innerHTML = '<option value="">載入中...</option>'
+  try {
+    const ops = await api('GET', '/operators')
+    if (!ops.length) {
+      sel.innerHTML = '<option value="">（尚無查詢員，請聯繫管理員）</option>'
+    } else {
+      sel.innerHTML = '<option value="">-- 請選擇您的姓名 --</option>' +
+        ops.map(o => `<option value="${o.name}">${o.name}</option>`).join('')
+    }
+  } catch {
+    sel.innerHTML = '<option value="">-- 載入失敗，請重試 --</option>'
+  }
+}
+
 async function loadPendingItems() {
-  const name = $('op-name').value.trim()
-  if (!name) { alert('請輸入您的姓名'); return }
+  const name = $('op-name-select').value
+  if (!name) { alert('請選擇您的姓名'); return }
   currentOperatorName = name
 
   try {
@@ -245,7 +270,7 @@ async function completeItem(id) {
 function switchOperator() {
   $('op-name-section').classList.remove('hidden')
   $('op-items-section').classList.add('hidden')
-  $('op-name').value = ''
+  $('op-name-select').value = ''
 }
 
 // ── Admin login ───────────────────────────────────────────────────────────────

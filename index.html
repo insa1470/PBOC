@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>查询系统</title>
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 <div id="app">
@@ -50,7 +50,7 @@
           <div class="card-arrow">›</div>
         </div>
 
-        <div class="role-card operator-card" onclick="goTo('operator')">
+        <div class="role-card operator-card" onclick="initOperator()">
           <div class="card-bg-shape"></div>
           <div class="card-icon">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -133,9 +133,10 @@
     <div id="op-name-section" class="form-wrap">
       <div class="form-section">
         <div class="form-group">
-          <label>请输入您的姓名</label>
-          <input id="op-name" type="text" placeholder="查询员姓名"
-            onkeydown="if(event.key==='Enter') loadPendingItems()">
+          <label>请选择您的姓名</label>
+          <select id="op-name-select">
+            <option value="">載入中...</option>
+          </select>
         </div>
         <button class="btn btn-primary" onclick="loadPendingItems()">查看待办</button>
       </div>
@@ -359,6 +360,6 @@
   </div>
 </div>
 
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>
