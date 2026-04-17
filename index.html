@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>查询系统</title>
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 <div id="app">
@@ -107,7 +107,7 @@
           <button class="btn btn-primary" onclick="addItem()">添加</button>
         </div>
         <div id="auth-date-notice" class="auth-date-notice hidden">
-          台账授权起始日：<strong id="selected-auth-date"></strong>
+          台账文件起始日：<strong id="selected-auth-date"></strong>
         </div>
       </div>
 
@@ -221,8 +221,8 @@
         <table>
           <thead>
             <tr>
-              <th>部门</th><th>组别</th><th>公司名称</th>
-              <th id="th-authdate" class="th-sortable" onclick="toggleSortAuthDate()">授权起始日 <span id="sort-icon">⇅</span></th><th>备注</th><th>操作</th>
+              <th>部门</th><th>公司名称</th>
+              <th id="th-authdate" class="th-sortable" onclick="toggleSortAuthDate()">文件起始日 <span id="sort-icon">⇅</span></th><th>备注</th><th>操作</th>
             </tr>
           </thead>
           <tbody id="ledger-tbody"></tbody>
@@ -331,14 +331,14 @@
   <div class="modal-content">
     <h3 id="modal-title">新增公司</h3>
     <div id="modal-add-warning" class="modal-warning hidden">
-      ⚠️ 台帳是查詢授權的核心依據。請確認資料來源正確，避免誤差導致查詢授權問題。
+      ⚠️ 台帳是查詢文件的核心依據。請確認資料來源正確，避免誤差導致查詢文件問題。
     </div>
     <div class="form-group">
       <label>公司名称 *</label>
       <input id="cf-name" type="text" placeholder="公司名称">
     </div>
     <div class="form-group">
-      <label>授权起始日 *</label>
+      <label>文件起始日 *</label>
       <input id="cf-date" type="text" placeholder="例如 2025.7.15">
     </div>
     <div class="form-group">
@@ -360,6 +360,6 @@
   </div>
 </div>
 
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>

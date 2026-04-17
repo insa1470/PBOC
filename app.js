@@ -167,7 +167,7 @@ function renderBatchList() {
         <strong>${item.company_name}</strong>
         <span class="purpose-tag">${item.purpose}</span>
       </div>
-      <span class="batch-item-date">授權日：${item.auth_date || '-'}</span>
+      <span class="batch-item-date">文件日：${item.auth_date || '-'}</span>
       <button class="btn-icon" onclick="removeItem(${i})" title="移除">&#10005;</button>
     </div>
   `).join('')
@@ -245,7 +245,7 @@ function renderPendingItems(items) {
         <strong>${item.company_name}</strong>&nbsp;
         <span class="purpose-tag">${item.purpose}</span>
         <div class="pending-item-meta">
-          申請人：${item.requester_name}&nbsp;|&nbsp;授權日：${item.company_auth_date || '-'}&nbsp;|&nbsp;${fmt(item.batch_created_at)}
+          申請人：${item.requester_name}&nbsp;|&nbsp;文件日：${item.company_auth_date || '-'}&nbsp;|&nbsp;${fmt(item.batch_created_at)}
         </div>
       </div>
       <button class="btn btn-success btn-sm" onclick="completeItem(${item.id})">完成</button>
@@ -349,7 +349,7 @@ function renderLedger(list) {
 
   const tbody = $('ledger-tbody')
   if (!list.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa">無資料</td></tr>'
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#aaa">無資料</td></tr>'
     return
   }
   tbody.innerHTML = list.map(c => {
@@ -362,7 +362,6 @@ function renderLedger(list) {
     return `
       <tr>
         <td>${c.sheet_name || ''}</td>
-        <td>${c.group_name || ''}</td>
         <td><strong>${c.name}</strong></td>
         <td style="white-space:nowrap">${c.auth_date || ''}${badge}</td>
         <td>${c.notes || ''}</td>
@@ -382,7 +381,7 @@ function exportLedger() {
     (!q     || c.name.toLowerCase().includes(q)) &&
     (!sheet || c.sheet_name === sheet)
   )
-  const rows = [['部門', '組別', '公司名稱', '授權起始日', '到期日（預估）', '備註']]
+  const rows = [['部門', '公司名稱', '文件起始日', '到期日（預估）', '備註']]
   list.forEach(c => {
     const d = parseAuthDate(c.auth_date)
     let expiry = ''
@@ -390,7 +389,7 @@ function exportLedger() {
       const e = new Date(d.getFullYear() + 1, d.getMonth(), d.getDate())
       expiry = `${e.getFullYear()}.${e.getMonth()+1}.${e.getDate()}`
     }
-    rows.push([c.sheet_name || '', c.group_name || '', c.name, c.auth_date || '', expiry, c.notes || ''])
+    rows.push([c.sheet_name || '', c.name, c.auth_date || '', expiry, c.notes || ''])
   })
   downloadCsv(rows, `台帳_${new Date().toISOString().slice(0,10)}.csv`)
 }
@@ -464,7 +463,7 @@ async function saveCompany() {
     sheet_name: $('cf-sheet').value.trim(),
     notes: $('cf-notes').value.trim(),
   }
-  if (!body.name || !body.auth_date) { alert('請填寫公司名稱及授權起始日'); return }
+  if (!body.name || !body.auth_date) { alert('請填寫公司名稱及文件起始日'); return }
   try {
     if (editingCompanyId) {
       await api('PUT', `/companies/${editingCompanyId}`, body, adminToken)
@@ -477,7 +476,7 @@ async function saveCompany() {
 }
 
 async function deleteCompany(id, name) {
-  if (!confirm(`⚠️ 刪除台帳公司\n\n「${name}」\n\n刪除後申請人將無法搜尋此公司。\n請確認此公司授權書已失效或不再需要查詢。\n\n確定刪除？此操作無法復原。`)) return
+  if (!confirm(`⚠️ 刪除台帳公司\n\n「${name}」\n\n刪除後申請人將無法搜尋此公司。\n請確認此公司文件已失效或不再需要查詢。\n\n確定刪除？此操作無法復原。`)) return
   try {
     await api('DELETE', `/companies/${id}`, undefined, adminToken)
     loadLedger()
