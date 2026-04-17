@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>查询系统</title>
-  <link rel="stylesheet" href="style.css?v=9">
+  <link rel="stylesheet" href="style.css?v=10">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -102,12 +102,11 @@
             <option value="">-- 查询目的 --</option>
             <option value="贷前">贷前</option>
             <option value="贷中">贷中</option>
-            <option value="贷后">贷后</option>
+            <option value="贷后">贷后（有贷款现欠才能选）</option>
             <option value="担保">担保</option>
           </select>
           <button class="btn btn-primary" onclick="addItem()">添加</button>
         </div>
-        <div id="purpose-warn" class="hidden" style="font-size:0.85em;color:#d32f2f;margin-top:4px">⚠️ 有貸款現欠才能選</div>
         <div id="auth-date-notice" class="auth-date-notice hidden">
           台账文件起始日：<strong id="selected-auth-date"></strong>
         </div>
@@ -370,6 +369,6 @@
   </div>
 </div>
 
-<script src="app.js?v=11"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>
