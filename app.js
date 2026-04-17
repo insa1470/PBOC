@@ -22,6 +22,26 @@ function fmt(str) {
   return String(str).replace('T', ' ').slice(0, 16)
 }
 
+// ── Date utilities ────────────────────────────────────────────────────────────
+
+function parseAuthDate(str) {
+  if (!str) return null
+  const s = String(str).replace(/[\/\-]/g, '.')
+  const parts = s.split('.')
+  if (parts.length < 3) return null
+  const y = parseInt(parts[0]), m = parseInt(parts[1]) - 1, d = parseInt(parts[2])
+  if (isNaN(y) || isNaN(m) || isNaN(d)) return null
+  return new Date(y, m, d)
+}
+
+function daysUntilExpiry(authDateStr) {
+  const d = parseAuthDate(authDateStr)
+  if (!d) return null
+  const expiry = new Date(d.getFullYear() + 1, d.getMonth(), d.getDate())
+  const now = new Date(); now.setHours(0, 0, 0, 0)
+  return Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
+}
+
 // ── State ────────────────────────────────────────────────────────────────────
 
 let adminToken = sessionStorage.getItem('adminToken')
@@ -263,25 +283,80 @@ async function loadLedger() {
   } catch (e) { alert('載入失敗：' + e.message) }
 }
 
+function updateLedgerStats(companies) {
+  const total     = companies.length
+  const waishang  = companies.filter(c => c.sheet_name === '外商组').length
+  const qijin     = companies.filter(c => c.sheet_name === '企金组').length
+  const expiring  = companies.filter(c => {
+    const d = daysUntilExpiry(c.auth_date)
+    return d !== null && d >= 0 && d <= 30
+  }).length
+
+  $('stat-total').textContent    = total
+  $('stat-waishang').textContent = waishang
+  $('stat-qijin').textContent    = qijin
+  $('stat-expiring').textContent = expiring
+
+  const card = $('stat-expiring-card')
+  card.classList.toggle('stat-card-warn', expiring > 0)
+}
+
 function renderLedger(list) {
+  updateLedgerStats(allCompanies)
+
   const tbody = $('ledger-tbody')
   if (!list.length) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa">無資料</td></tr>'
     return
   }
-  tbody.innerHTML = list.map(c => `
-    <tr>
-      <td>${c.sheet_name || ''}</td>
-      <td>${c.group_name || ''}</td>
-      <td><strong>${c.name}</strong></td>
-      <td>${c.auth_date || ''}</td>
-      <td>${c.notes || ''}</td>
-      <td style="white-space:nowrap">
-        <button class="btn btn-sm" onclick="editCompany(${c.id})">编辑</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteCompany(${c.id}, \`${c.name.replace(/`/g,'\\`')}\`)">刪除</button>
-      </td>
-    </tr>
-  `).join('')
+  tbody.innerHTML = list.map(c => {
+    const days = daysUntilExpiry(c.auth_date)
+    let badge = ''
+    if (days !== null) {
+      if (days < 0)        badge = `<span class="expiry-badge expiry-expired">已到期</span>`
+      else if (days <= 30) badge = `<span class="expiry-badge expiry-warn">${days}天後到期</span>`
+    }
+    return `
+      <tr>
+        <td>${c.sheet_name || ''}</td>
+        <td>${c.group_name || ''}</td>
+        <td><strong>${c.name}</strong></td>
+        <td style="white-space:nowrap">${c.auth_date || ''}${badge}</td>
+        <td>${c.notes || ''}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-sm" onclick="editCompany(${c.id})">编辑</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteCompany(${c.id}, \`${c.name.replace(/`/g,'\\`')}\`)">刪除</button>
+        </td>
+      </tr>
+    `
+  }).join('')
+}
+
+function exportLedger() {
+  const q     = $('ledger-search').value.trim().toLowerCase()
+  const sheet = $('ledger-filter-sheet').value
+  const list  = allCompanies.filter(c =>
+    (!q     || c.name.toLowerCase().includes(q)) &&
+    (!sheet || c.sheet_name === sheet)
+  )
+  const rows = [['部門', '組別', '公司名稱', '授權起始日', '到期日（預估）', '備註']]
+  list.forEach(c => {
+    const d = parseAuthDate(c.auth_date)
+    let expiry = ''
+    if (d) {
+      const e = new Date(d.getFullYear() + 1, d.getMonth(), d.getDate())
+      expiry = `${e.getFullYear()}.${e.getMonth()+1}.${e.getDate()}`
+    }
+    rows.push([c.sheet_name || '', c.group_name || '', c.name, c.auth_date || '', expiry, c.notes || ''])
+  })
+  const csv  = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href = url
+  a.download = `台帳_${new Date().toISOString().slice(0,10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 function filterLedger() {
@@ -297,6 +372,7 @@ function showCompanyForm() {
   editingCompanyId = null
   $('modal-title').textContent = '新增公司'
   $('cf-name').value = $('cf-date').value = $('cf-sheet').value = $('cf-notes').value = ''
+  $('modal-add-warning').classList.remove('hidden')
   $('company-modal').classList.remove('hidden')
   $('cf-name').focus()
 }
@@ -310,6 +386,7 @@ function editCompany(id) {
   $('cf-date').value = c.auth_date
   $('cf-sheet').value = c.sheet_name || ''
   $('cf-notes').value = c.notes || ''
+  $('modal-add-warning').classList.add('hidden')
   $('company-modal').classList.remove('hidden')
   $('cf-name').focus()
 }
@@ -337,7 +414,7 @@ async function saveCompany() {
 }
 
 async function deleteCompany(id, name) {
-  if (!confirm(`確定要刪除「${name}」？此操作無法復原。`)) return
+  if (!confirm(`⚠️ 刪除台帳公司\n\n「${name}」\n\n刪除後申請人將無法搜尋此公司。\n請確認此公司授權書已失效或不再需要查詢。\n\n確定刪除？此操作無法復原。`)) return
   try {
     await api('DELETE', `/companies/${id}`, undefined, adminToken)
     loadLedger()

@@ -609,6 +609,63 @@ tr:hover td { background: rgba(0,122,255,0.02); }
 }
 .modal-actions .btn { flex: 1; padding: 13px; border-radius: var(--radius); font-size: 15px; }
 
+/* ── Ledger stats panel ──────────────────────── */
+.ledger-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.stat-card {
+  background: var(--card);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 8px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s, background 0.2s;
+}
+.stat-num {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--gray1);
+  line-height: 1.2;
+}
+.stat-label {
+  font-size: 10px;
+  color: var(--gray3);
+  margin-top: 3px;
+  white-space: nowrap;
+}
+.stat-card-warn { border-color: rgba(255,59,48,0.35); background: rgba(255,59,48,0.04); }
+.stat-card-warn .stat-num { color: var(--red); }
+
+/* ── Expiry badges ───────────────────────────── */
+.expiry-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+.expiry-warn    { background: rgba(255,149,0,0.12); color: #884400; }
+.expiry-expired { background: rgba(255,59,48,0.12);  color: #c00; }
+
+/* ── Modal warning notice ────────────────────── */
+.modal-warning {
+  background: rgba(255,149,0,0.08);
+  border: 1px solid rgba(255,149,0,0.35);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #7a4500;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
 /* ── Responsive ──────────────────────────────── */
 @media (max-width: 480px) {
   .role-cards { flex-direction: column; align-items: stretch; max-width: 300px; }

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>查询系统</title>
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 <div id="app">
@@ -188,13 +188,32 @@
 
     <!-- 台账 -->
     <div class="tab-content" data-tab="ledger">
+      <div class="ledger-stats">
+        <div class="stat-card">
+          <div class="stat-num" id="stat-total">-</div>
+          <div class="stat-label">全部</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-waishang">-</div>
+          <div class="stat-label">外商组</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-qijin">-</div>
+          <div class="stat-label">企金组</div>
+        </div>
+        <div class="stat-card" id="stat-expiring-card">
+          <div class="stat-num" id="stat-expiring">-</div>
+          <div class="stat-label">30天内到期</div>
+        </div>
+      </div>
       <div class="tab-toolbar">
-        <input id="ledger-search" type="text" placeholder="搜索公司名称..." oninput="filterLedger()" style="max-width:200px">
-        <select id="ledger-filter-sheet" onchange="filterLedger()" style="max-width:110px">
+        <input id="ledger-search" type="text" placeholder="搜索公司名称..." oninput="filterLedger()" style="max-width:160px">
+        <select id="ledger-filter-sheet" onchange="filterLedger()" style="max-width:100px">
           <option value="">全部部门</option>
           <option value="外商组">外商组</option>
           <option value="企金组">企金组</option>
         </select>
+        <button class="btn btn-ghost btn-sm" onclick="exportLedger()">↓ 匯出</button>
         <button class="btn btn-primary" onclick="showCompanyForm()">+ 新增</button>
       </div>
       <div class="table-wrap">
@@ -287,6 +306,9 @@
 <div id="company-modal" class="modal hidden" onclick="if(event.target===this)closeCompanyForm()">
   <div class="modal-content">
     <h3 id="modal-title">新增公司</h3>
+    <div id="modal-add-warning" class="modal-warning hidden">
+      ⚠️ 台帳是查詢授權的核心依據。請確認資料來源正確，避免誤差導致查詢授權問題。
+    </div>
     <div class="form-group">
       <label>公司名称 *</label>
       <input id="cf-name" type="text" placeholder="公司名称">
@@ -314,6 +336,6 @@
   </div>
 </div>
 
-<script src="app.js?v=3"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>
