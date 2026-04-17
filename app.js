@@ -42,6 +42,15 @@ function daysUntilExpiry(authDateStr) {
   return Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
 }
 
+function downloadCsv(rows, filename) {
+  const csv  = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href = url; a.download = filename; a.click()
+  URL.revokeObjectURL(url)
+}
+
 // ── State ────────────────────────────────────────────────────────────────────
 
 let adminToken = sessionStorage.getItem('adminToken')
@@ -349,14 +358,7 @@ function exportLedger() {
     }
     rows.push([c.sheet_name || '', c.group_name || '', c.name, c.auth_date || '', expiry, c.notes || ''])
   })
-  const csv  = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
-  const url  = URL.createObjectURL(blob)
-  const a    = document.createElement('a')
-  a.href = url
-  a.download = `台帳_${new Date().toISOString().slice(0,10)}.csv`
-  a.click()
-  URL.revokeObjectURL(url)
+  downloadCsv(rows, `台帳_${new Date().toISOString().slice(0,10)}.csv`)
 }
 
 function filterLedger() {
@@ -423,51 +425,123 @@ async function deleteCompany(id, name) {
 
 // ── Records ───────────────────────────────────────────────────────────────────
 
+let allRecords = []
+
 async function loadRecords() {
   try {
-    const items = await api('GET', '/items', undefined, adminToken)
-    const tbody = $('records-tbody')
-    if (!items.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa">無資料</td></tr>'
-      return
-    }
-    tbody.innerHTML = items.map(i => `
-      <tr>
-        <td>${fmt(i.batch_created_at)}</td>
-        <td>${i.requester_name}</td>
-        <td>${i.operator_name}</td>
-        <td>${i.company_name}</td>
-        <td><span class="purpose-tag">${i.purpose}</span></td>
-        <td>
-          <span class="${i.status === 'completed' ? 'status-done' : 'status-pending'}">
-            ${i.status === 'completed' ? '已完成' : '待處理'}
-          </span>
-          ${i.completed_by ? `<div style="font-size:11px;color:#aaa;margin-top:2px">${i.completed_by} ${fmt(i.completed_at)}</div>` : ''}
-        </td>
-      </tr>
-    `).join('')
+    allRecords = await api('GET', '/items', undefined, adminToken)
+    $('rec-search').value = ''
+    $('rec-filter-purpose').value = ''
+    $('rec-filter-status').value = ''
+    renderRecords(allRecords)
   } catch (e) { alert('載入失敗：' + e.message) }
+}
+
+function filterRecords() {
+  const q       = $('rec-search').value.trim().toLowerCase()
+  const purpose = $('rec-filter-purpose').value
+  const status  = $('rec-filter-status').value
+  renderRecords(allRecords.filter(i =>
+    (!q       || [i.requester_name, i.operator_name, i.company_name].some(v => v?.toLowerCase().includes(q))) &&
+    (!purpose || i.purpose === purpose) &&
+    (!status  || i.status  === status)
+  ))
+}
+
+function renderRecords(list) {
+  const tbody = $('records-tbody')
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa">無資料</td></tr>'
+    return
+  }
+  tbody.innerHTML = list.map(i => `
+    <tr>
+      <td style="white-space:nowrap">${fmt(i.batch_created_at)}</td>
+      <td>${i.requester_name}</td>
+      <td>${i.operator_name}</td>
+      <td>${i.company_name}</td>
+      <td><span class="purpose-tag">${i.purpose}</span></td>
+      <td>
+        <span class="${i.status === 'completed' ? 'status-done' : 'status-pending'}">
+          ${i.status === 'completed' ? '已完成' : '待處理'}
+        </span>
+        ${i.completed_by ? `<div style="font-size:11px;color:#aaa;margin-top:2px">${i.completed_by} ${fmt(i.completed_at)}</div>` : ''}
+      </td>
+    </tr>
+  `).join('')
+}
+
+function exportRecords() {
+  const q       = $('rec-search').value.trim().toLowerCase()
+  const purpose = $('rec-filter-purpose').value
+  const status  = $('rec-filter-status').value
+  const list    = allRecords.filter(i =>
+    (!q       || [i.requester_name, i.operator_name, i.company_name].some(v => v?.toLowerCase().includes(q))) &&
+    (!purpose || i.purpose === purpose) &&
+    (!status  || i.status  === status)
+  )
+  const rows = [['申請時間', '申請人', '查詢員', '公司名稱', '查詢目的', '狀態', '完成人', '完成時間']]
+  list.forEach(i => rows.push([
+    fmt(i.batch_created_at), i.requester_name, i.operator_name,
+    i.company_name, i.purpose,
+    i.status === 'completed' ? '已完成' : '待處理',
+    i.completed_by || '', fmt(i.completed_at)
+  ]))
+  downloadCsv(rows, `查詢記錄_${new Date().toISOString().slice(0,10)}.csv`)
 }
 
 // ── Logs ──────────────────────────────────────────────────────────────────────
 
+let allLogs = []
+
 async function loadLogs() {
   try {
-    const logs = await api('GET', '/logs', undefined, adminToken)
-    const tbody = $('logs-tbody')
-    if (!logs.length) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa">無資料</td></tr>'
-      return
-    }
-    tbody.innerHTML = logs.map(l => `
-      <tr>
-        <td style="white-space:nowrap">${fmt(l.created_at)}</td>
-        <td>${l.actor}</td>
-        <td>${l.action}</td>
-        <td>${l.detail || ''}</td>
-      </tr>
-    `).join('')
+    allLogs = await api('GET', '/logs', undefined, adminToken)
+    $('log-search').value = ''
+    // populate action dropdown
+    const actions = [...new Set(allLogs.map(l => l.action).filter(Boolean))].sort()
+    const sel = $('log-filter-action')
+    sel.innerHTML = '<option value="">全部动作</option>' +
+      actions.map(a => `<option value="${a}">${a}</option>`).join('')
+    renderLogs(allLogs)
   } catch (e) { alert('載入失敗：' + e.message) }
+}
+
+function filterLogs() {
+  const q      = $('log-search').value.trim().toLowerCase()
+  const action = $('log-filter-action').value
+  renderLogs(allLogs.filter(l =>
+    (!q      || [l.actor, l.action, l.detail].some(v => v?.toLowerCase().includes(q))) &&
+    (!action || l.action === action)
+  ))
+}
+
+function renderLogs(list) {
+  const tbody = $('logs-tbody')
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#aaa">無資料</td></tr>'
+    return
+  }
+  tbody.innerHTML = list.map(l => `
+    <tr>
+      <td style="white-space:nowrap">${fmt(l.created_at)}</td>
+      <td>${l.actor}</td>
+      <td>${l.action}</td>
+      <td>${l.detail || ''}</td>
+    </tr>
+  `).join('')
+}
+
+function exportLogs() {
+  const q      = $('log-search').value.trim().toLowerCase()
+  const action = $('log-filter-action').value
+  const list   = allLogs.filter(l =>
+    (!q      || [l.actor, l.action, l.detail].some(v => v?.toLowerCase().includes(q))) &&
+    (!action || l.action === action)
+  )
+  const rows = [['時間', '操作人', '動作', '詳情']]
+  list.forEach(l => rows.push([fmt(l.created_at), l.actor, l.action, l.detail || '']))
+  downloadCsv(rows, `操作日誌_${new Date().toISOString().slice(0,10)}.csv`)
 }
 
 // ── Operators admin ───────────────────────────────────────────────────────────

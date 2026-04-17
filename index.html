@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>查询系统</title>
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <div id="app">
@@ -231,6 +231,22 @@
 
     <!-- 查询记录 -->
     <div class="tab-content hidden" data-tab="records">
+      <div class="tab-toolbar">
+        <input id="rec-search" type="text" placeholder="搜索申请人/查询员/公司..." oninput="filterRecords()" style="max-width:180px">
+        <select id="rec-filter-purpose" onchange="filterRecords()" style="max-width:90px">
+          <option value="">全部目的</option>
+          <option value="贷前">贷前</option>
+          <option value="贷中">贷中</option>
+          <option value="贷后">贷后</option>
+          <option value="担保">担保</option>
+        </select>
+        <select id="rec-filter-status" onchange="filterRecords()" style="max-width:90px">
+          <option value="">全部状态</option>
+          <option value="pending">待处理</option>
+          <option value="completed">已完成</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="exportRecords()">↓ 匯出</button>
+      </div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -246,6 +262,13 @@
 
     <!-- 操作日志 -->
     <div class="tab-content hidden" data-tab="logs">
+      <div class="tab-toolbar">
+        <input id="log-search" type="text" placeholder="搜索操作人/动作/详情..." oninput="filterLogs()" style="max-width:200px">
+        <select id="log-filter-action" onchange="filterLogs()" style="max-width:120px">
+          <option value="">全部动作</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="exportLogs()">↓ 匯出</button>
+      </div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -336,6 +359,6 @@
   </div>
 </div>
 
-<script src="app.js?v=4"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>
