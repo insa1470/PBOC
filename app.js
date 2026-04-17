@@ -60,6 +60,8 @@ let allCompanies = []
 let editingCompanyId = null
 let currentOperatorName = ''
 let searchTimer = null
+let ledgerSortDir = 0      // 0=none, 1=asc, -1=desc
+let showExpiringOnly = false
 
 // ── Requester ────────────────────────────────────────────────────────────────
 
@@ -288,7 +290,13 @@ function loadAdminTab(tab) {
 async function loadLedger() {
   try {
     allCompanies = await api('GET', '/companies', undefined, adminToken)
-    renderLedger(allCompanies)
+    ledgerSortDir = 0
+    showExpiringOnly = false
+    $('sort-icon').textContent = '⇅'
+    $('th-authdate').classList.remove('th-sorted')
+    $('stat-expiring-card').classList.remove('stat-card-active')
+    $('expiring-filter-dot').classList.add('hidden')
+    filterLedger()
   } catch (e) { alert('載入失敗：' + e.message) }
 }
 
@@ -364,10 +372,37 @@ function exportLedger() {
 function filterLedger() {
   const q     = $('ledger-search').value.trim().toLowerCase()
   const sheet = $('ledger-filter-sheet').value
-  renderLedger(allCompanies.filter(c =>
+  let list = allCompanies.filter(c =>
     (!q     || c.name.toLowerCase().includes(q)) &&
-    (!sheet || c.sheet_name === sheet)
-  ))
+    (!sheet || c.sheet_name === sheet) &&
+    (!showExpiringOnly || (() => { const d = daysUntilExpiry(c.auth_date); return d !== null && d >= 0 && d <= 30 })())
+  )
+  if (ledgerSortDir !== 0) {
+    list = [...list].sort((a, b) => {
+      const da = parseAuthDate(a.auth_date), db = parseAuthDate(b.auth_date)
+      if (!da && !db) return 0
+      if (!da) return 1
+      if (!db) return -1
+      return (da - db) * ledgerSortDir
+    })
+  }
+  renderLedger(list)
+}
+
+function toggleSortAuthDate() {
+  ledgerSortDir = ledgerSortDir === 1 ? -1 : ledgerSortDir === -1 ? 0 : 1
+  const icons = { 0: '⇅', 1: '↑', '-1': '↓' }
+  $('sort-icon').textContent = icons[String(ledgerSortDir)]
+  $('th-authdate').classList.toggle('th-sorted', ledgerSortDir !== 0)
+  filterLedger()
+}
+
+function toggleExpiringFilter() {
+  showExpiringOnly = !showExpiringOnly
+  const card = $('stat-expiring-card')
+  card.classList.toggle('stat-card-active', showExpiringOnly)
+  $('expiring-filter-dot').classList.toggle('hidden', !showExpiringOnly)
+  filterLedger()
 }
 
 function showCompanyForm() {

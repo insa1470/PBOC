@@ -640,6 +640,19 @@ tr:hover td { background: rgba(0,122,255,0.02); }
 }
 .stat-card-warn { border-color: rgba(255,59,48,0.35); background: rgba(255,59,48,0.04); }
 .stat-card-warn .stat-num { color: var(--red); }
+.stat-card-active { border-color: var(--blue) !important; background: rgba(0,122,255,0.06) !important; box-shadow: 0 0 0 2px rgba(0,122,255,0.2); }
+.stat-card-active .stat-num { color: var(--blue); }
+#expiring-filter-dot { font-size: 8px; color: var(--blue); vertical-align: middle; margin-left: 2px; }
+
+/* ── Sortable column header ──────────────────── */
+.th-sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.th-sortable:hover { color: var(--blue); }
+.th-sorted { color: var(--blue); }
+#sort-icon { font-size: 11px; margin-left: 3px; opacity: 0.7; }
 
 /* ── Expiry badges ───────────────────────────── */
 .expiry-badge {

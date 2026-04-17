@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>查询系统</title>
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 <div id="app">
@@ -201,9 +201,9 @@
           <div class="stat-num" id="stat-qijin">-</div>
           <div class="stat-label">企金组</div>
         </div>
-        <div class="stat-card" id="stat-expiring-card">
+        <div class="stat-card" id="stat-expiring-card" onclick="toggleExpiringFilter()" style="cursor:pointer">
           <div class="stat-num" id="stat-expiring">-</div>
-          <div class="stat-label">30天内到期</div>
+          <div class="stat-label">30天内到期 <span id="expiring-filter-dot" class="hidden">●</span></div>
         </div>
       </div>
       <div class="tab-toolbar">
@@ -221,7 +221,7 @@
           <thead>
             <tr>
               <th>部门</th><th>组别</th><th>公司名称</th>
-              <th>授权起始日</th><th>备注</th><th>操作</th>
+              <th id="th-authdate" class="th-sortable" onclick="toggleSortAuthDate()">授权起始日 <span id="sort-icon">⇅</span></th><th>备注</th><th>操作</th>
             </tr>
           </thead>
           <tbody id="ledger-tbody"></tbody>
@@ -359,6 +359,6 @@
   </div>
 </div>
 
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
