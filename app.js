@@ -84,7 +84,8 @@ async function initRequester() {
 function onCompanyInput(e) {
   clearTimeout(searchTimer)
   const q = e.target.value.trim()
-  if (!q) { hideDropdown(); resetAuthNotice(); return }
+  resetAuthNotice()                          // 只要開始輸入就清掉舊的授權日
+  if (!q) { hideDropdown(); return }
   searchTimer = setTimeout(() => fetchSuggestions(q), 280)
 }
 
