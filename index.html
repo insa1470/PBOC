@@ -98,7 +98,7 @@
             <input id="company-search" type="text" placeholder="输入公司名称搜索..." oninput="onCompanyInput(event)" autocomplete="off">
             <div id="company-dropdown" class="dropdown hidden"></div>
           </div>
-          <select id="item-purpose">
+          <select id="item-purpose" onchange="onPurposeChange()">
             <option value="">-- 查询目的 --</option>
             <option value="贷前">贷前</option>
             <option value="贷中">贷中</option>
@@ -107,6 +107,7 @@
           </select>
           <button class="btn btn-primary" onclick="addItem()">添加</button>
         </div>
+        <div id="purpose-warn" class="hidden" style="font-size:0.85em;color:#d32f2f;margin-top:4px">⚠️ 有貸款現欠才能選</div>
         <div id="auth-date-notice" class="auth-date-notice hidden">
           台账文件起始日：<strong id="selected-auth-date"></strong>
         </div>
@@ -223,7 +224,7 @@
           <thead>
             <tr>
               <th>部门</th><th>公司名称</th>
-              <th id="th-authdate" class="th-sortable" onclick="toggleSortAuthDate()">文件起始日 <span id="sort-icon">⇅</span></th><th>备注</th><th>操作</th>
+              <th id="th-authdate" class="th-sortable" onclick="toggleSortAuthDate()">文件起始日 <span id="sort-icon">⇅</span></th><th>操作</th><th style="font-size:0.75em">备注</th>
             </tr>
           </thead>
           <tbody id="ledger-tbody"></tbody>

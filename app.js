@@ -124,6 +124,11 @@ function pickCompany(encoded) {
   hideDropdown()
 }
 
+function onPurposeChange() {
+  const v = $('item-purpose').value
+  $('purpose-warn').classList.toggle('hidden', v !== '贷后')
+}
+
 function resetAuthNotice() {
   selectedCompany = null
   $('auth-date-notice').classList.add('hidden')
@@ -369,11 +374,11 @@ function renderLedger(list) {
         <td>${c.sheet_name || ''}</td>
         <td><strong>${c.name}</strong></td>
         <td style="white-space:nowrap">${c.auth_date || ''}${badge}</td>
-        <td>${c.notes || ''}</td>
         <td style="white-space:nowrap">
           <button class="btn btn-sm" onclick="editCompany(${c.id})">编辑</button>
           <button class="btn btn-sm btn-danger" onclick="deleteCompany(${c.id}, \`${c.name.replace(/`/g,'\\`')}\`)">刪除</button>
         </td>
+        <td style="font-size:0.72em;color:#888;max-width:120px">${c.notes || ''}</td>
       </tr>
     `
   }).join('')
