@@ -397,7 +397,7 @@ function renderLedger(list) {
     return `
       <tr>
         <td>${c.sheet_name || ''}</td>
-        <td style="position:relative"><strong>${c.name}</strong>${c.notes ? '<span style="position:absolute;top:2px;left:4px;font-size:0.7em;color:#e53935;line-height:1">＊</span>' : ''}</td>
+        <td><strong>${c.name}</strong>${c.notes ? '<span style="font-size:0.85em;color:#e53935;vertical-align:super;margin-left:2px">＊</span>' : ''}</td>
         <td style="white-space:nowrap">${c.auth_date || ''}${badge}</td>
         <td style="white-space:nowrap">
           <button class="btn btn-sm" onclick="editCompany(${c.id})">编辑</button>
