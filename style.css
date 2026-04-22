@@ -701,3 +701,16 @@ tr:hover td { background: rgba(0,122,255,0.02); }
     to   { transform: scale(1);    opacity: 1; }
   }
 }
+
+/* 管理員台帳搜尋框 */
+#ledger-search {
+  border: 1.5px solid #aab0bb !important;
+  border-radius: 8px !important;
+  padding: 6px 10px !important;
+  background: #fff !important;
+  width: 100%;
+}
+#ledger-search:focus {
+  border-color: var(--blue) !important;
+  outline: none;
+}
