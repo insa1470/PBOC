@@ -51,6 +51,7 @@ async function dispatch(path, method, req, env, url) {
   if (seg[0] === 'items') {
     if (method === 'GET' && !seg[1]) return getAllItems(req, env)
     if (method === 'PUT' && seg[2] === 'complete') return completeItem(seg[1], req, env)
+    if (method === 'DELETE' && seg[1]) return deleteItem(seg[1], req, env)
   }
   if (seg[0] === 'logs' && method === 'GET') return getLogs(req, env)
   if (seg[0] === 'admin') {
@@ -252,6 +253,16 @@ async function completeItem(id, req, env) {
      completed_at=strftime('%Y-%m-%d %H:%M:%S','now','+8 hours') WHERE id=?`
   ).bind(operator_name.trim(), id).run()
   await addLog(env, operator_name.trim(), 'operator', '完成查詢', item.company_name)
+  return j({ success: true })
+}
+
+async function deleteItem(id, req, env) {
+  const { operator_name } = await req.json()
+  if (!operator_name?.trim()) return j({ error: '請提供查詢員姓名' }, 400)
+  const item = await env.DB.prepare(`SELECT * FROM items WHERE id=?`).bind(id).first()
+  if (!item) return j({ error: '找不到此筆申請' }, 404)
+  await env.DB.prepare(`DELETE FROM items WHERE id=?`).bind(id).run()
+  await addLog(env, operator_name.trim(), 'operator', '刪除待辦', item.company_name)
   return j({ success: true })
 }
 

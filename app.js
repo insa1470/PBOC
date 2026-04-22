@@ -265,6 +265,7 @@ function renderPendingItems(items) {
         </div>
       </div>
       <button class="btn btn-success btn-sm" onclick="completeItem(${item.id})">完成</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteItem(${item.id})">刪除</button>
     </div>
   `).join('')
 }
@@ -298,6 +299,17 @@ async function completeItem(id) {
     renderCompletedItems()
   } catch (e) {
     alert('操作失敗：' + e.message)
+  }
+}
+
+async function deleteItem(id) {
+  if (!confirm('確定要刪除這筆待辦？')) return
+  try {
+    await api('DELETE', `/items/${id}`, { operator_name: currentOperatorName })
+    pendingItemsData = pendingItemsData.filter(i => i.id !== id)
+    renderPendingItems(pendingItemsData)
+  } catch (e) {
+    alert('刪除失敗：' + e.message)
   }
 }
 
